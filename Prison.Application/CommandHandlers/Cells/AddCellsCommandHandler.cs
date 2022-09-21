@@ -20,6 +20,7 @@ internal class AddCellsCommandHandler : IRequestHandler<AddCellCommand, CellDto>
         this._repository = repository;
         _prisonRepo = prisonRepo;
     }
+
     public async Task<CellDto> Handle(AddCellCommand request, CancellationToken cancellationToken)
     {
         ValidationResult result = await new AddCellCommandValidator().ValidateAsync(request);
@@ -29,13 +30,14 @@ internal class AddCellsCommandHandler : IRequestHandler<AddCellCommand, CellDto>
         }
 
         Cell cell = new Cell(request.Capacity, request.IsIsolation);
+        _repository.Add(cell);
+
 
         PrisonBuilding prison = await _prisonRepo.GetAsync(p => p.Id == request.PrisonId && p.IsDeleted == false);
-        
-        prison.Cells.Add(cell);
-        
-        _repository.Add(cell);
+        prison.Add(cell);
+
         await _repository.SaveChangesAsync();
+        await _prisonRepo.SaveChangesAsync();
 
         return CellDto.FromCell(cell);
     }

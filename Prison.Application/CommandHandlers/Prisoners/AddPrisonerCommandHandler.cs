@@ -31,17 +31,12 @@ internal class AddPrisonerCommandHandler : IRequestHandler<AddPrisonerCommand, P
         }
 
         Prisoner prisoner = new Prisoner(request.Name, request.WhenFree, request.PType, request.IsMale);
-        var freeCell = await _cellRepo.GetAsync(c => c.Prisoners.Count < c.Capacity);
-
-        if (freeCell == null)
-        {
-            throw new NotFoundException("All Cells are full");
-        }
-        freeCell.Prisoners.Add(prisoner);
-
+        
+        var prison = await _prisonRepo.GetAsync(p => p.Id == request.PrisonId && !p.IsDeleted);
         _repository.Add(prisoner);
+        prison.Add(prisoner);
+
         await _repository.SaveChangesAsync();
-        await _prisonRepo.SaveChangesAsync();
         await _cellRepo.SaveChangesAsync();
         return PrisonerDto.FromPrisoner(prisoner);
     }

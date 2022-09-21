@@ -15,4 +15,15 @@ public class Cell : BaseAuditableEntity
         if (isIsolation)
             this.Capacity = 1;
     }
+
+    public bool CanAdd(Prisoner prisoner)
+    {
+        if (Capacity <= Prisoners.Count) return false;
+        return true;
+    }
+    public void Add(Prisoner prisoner)
+    {
+        Prisoners.Add(prisoner);
+    }
+
 }
